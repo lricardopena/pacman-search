@@ -72,7 +72,7 @@ def begin_graphics(width=640, height=480, color=formatColor(0, 0, 0), title=None
     _bg_color = color
 
     # Create the root window
-    _root_window = Tkinter.Tk()
+    _root_window = root
     _root_window.protocol('WM_DELETE_WINDOW', _destroy_window)
     _root_window.title(title or 'Graphics Window')
     _root_window.resizable(0, 0)
@@ -320,7 +320,7 @@ def _clear_keys(event=None):
     _got_release = None
 
 
-def keys_pressed(d_o_e=Tkinter.Tk().dooneevent,
+def keys_pressed(d_o_e=root.dooneevent,
                  d_w=Tkinter._tkinter.DONT_WAIT):
     d_o_e(d_w)
     if _got_release:
