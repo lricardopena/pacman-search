@@ -32,7 +32,7 @@ class GhostAgent( Agent ):
 
     def getDistribution(self, state):
         "Returns a Counter encoding a distribution over actions from the provided state."
-        util.raiseNotDefined()
+        util.raise_method_not_defined()
 
 class RandomGhost( GhostAgent ):
     "A ghost that chooses a legal action uniformly at random."

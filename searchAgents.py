@@ -33,6 +33,7 @@ description for details.
 
 Good luck and happy searching!
 """
+import inspect
 
 from game import Directions
 from game import Agent
@@ -83,7 +84,8 @@ class SearchAgent(Agent):
         if fn not in dir(search):
             raise AttributeError(fn + ' is not a search function in search.py.')
         func = getattr(search, fn)
-        if 'heuristic' not in func.func_code.co_varnames:
+        arguments_in_func = inspect.getfullargspec(func).args
+        if 'heuristic' not in arguments_in_func:
             print('[SearchAgent] using function ' + fn)
             self.searchFunction = func
         else:
@@ -314,14 +316,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        util.raise_method_not_defined()
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        util.raise_method_not_defined()
 
     def getSuccessors(self, state):
         """
@@ -519,7 +521,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        util.raise_method_not_defined()
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -557,7 +559,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x, y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        util.raise_method_not_defined()
 
 
 def mazeDistance(point1, point2, gameState):

@@ -45,7 +45,7 @@ class Agent:
         The Agent will receive a GameState (from either {pacman, capture, sonar}.py) and
         must return an action from Directions.{North, South, East, West, Stop}
         """
-        raiseNotDefined()
+        raise_method_not_defined()
 
 
 class Directions:

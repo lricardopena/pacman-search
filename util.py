@@ -458,12 +458,12 @@ class Counter(dict):
         return addend
 
 
-def raiseNotDefined():
-    fileName = inspect.stack()[1][1]
+def raise_method_not_defined():
+    file_name = inspect.stack()[1][1]
     line = inspect.stack()[1][2]
     method = inspect.stack()[1][3]
 
-    print("*** Method not implemented: %s at line %s of %s" % (method, line, fileName))
+    print(f"*** Method not implemented: {method} at line {line} of {file_name}")
     sys.exit(1)
 
 
