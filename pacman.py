@@ -451,19 +451,19 @@ class GhostRules:
             for index in range(1, len(state.data.agentStates)):
                 ghost_state = state.data.agentStates[index]
                 ghost_position = ghost_state.configuration.get_position()
-                if GhostRules.canKill(pacman_position, ghost_position):
+                if GhostRules.can_kill(pacman_position, ghost_position):
                     GhostRules.collide(state, ghost_state, index)
         else:
             ghost_state = state.data.agentStates[agent_index]
             ghost_position = ghost_state.configuration.get_position()
-            if GhostRules.canKill(pacman_position, ghost_position):
+            if GhostRules.can_kill(pacman_position, ghost_position):
                 GhostRules.collide(state, ghost_state, agent_index)
 
     @staticmethod
     def collide(state, ghost_state, agent_index):
         if ghost_state.scaredTimer > 0:
             state.data.scoreChange += 200
-            GhostRules.placeGhost(state, ghost_state)
+            GhostRules.place_ghost(state, ghost_state)
             ghost_state.scaredTimer = 0
             # Added for first-person
             state.data.eaten[agent_index] = True
@@ -474,25 +474,26 @@ class GhostRules:
 
 
     @staticmethod
-    def canKill(pacmanPosition, ghostPosition):
-        return manhattanDistance(ghostPosition, pacmanPosition) <= COLLISION_TOLERANCE
+    def can_kill(pacman_position, ghost_position):
+        return manhattanDistance(ghost_position, pacman_position) <= COLLISION_TOLERANCE
 
     @staticmethod
-    def placeGhost(state, ghostState):
-        ghostState.configuration = ghostState.start
+    def place_ghost(state, ghost_state):
+        ghost_state.configuration = ghost_state.start
 
 
 #############################
 # FRAMEWORK TO START A GAME #
 #############################
 
-def default(str):
-    return str + ' [Default: %default]'
+def default(str_):
+    return str_ + ' [Default: %default]'
 
 
-def parseAgentArgs(str):
-    if str == None: return {}
-    pieces = str.split(',')
+def parse_agent_args(str_):
+    if str_ is None:
+        return {}
+    pieces = str_.split(',')
     opts = {}
     for p in pieces:
         if '=' in p:
@@ -569,7 +570,7 @@ def readCommand(argv):
     # Choose a Pacman agent
     noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics)
     pacmanType = loadAgent(options.pacman, noKeyboard)
-    agentOpts = parseAgentArgs(options.agentArgs)
+    agentOpts = parse_agent_args(options.agentArgs)
     if options.numTraining > 0:
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining

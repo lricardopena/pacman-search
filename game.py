@@ -22,7 +22,7 @@
 
 import traceback
 
-from pacman import GameState
+# from pacman import GameState
 from util import *
 
 
@@ -550,7 +550,7 @@ class Game:
     """
     The Game manages the control flow, soliciting actions from agents.
     """
-    state: GameState
+    state = None
 
     def __init__(self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False):
         self.agentCrashed = False
