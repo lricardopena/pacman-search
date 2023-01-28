@@ -26,9 +26,12 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-import sys
+import heapq
 import inspect
-import heapq, random
+import random
+import signal
+import sys
+import time
 
 
 class FixedRandom:
@@ -621,7 +624,7 @@ def pause():
     Pauses the output stream awaiting user feedback.
     """
     print("<Press enter/return to continue>")
-    raw_input()
+    input()
 
 
 # code to handle timeouts
@@ -632,10 +635,6 @@ def pause():
 # of active time outs.  Currently, questions which have test cases calling
 # this have all student code so wrapped.
 #
-import signal
-import time
-
-
 class TimeoutFunctionException(Exception):
     """Exception to raise on a timeout"""
     pass
