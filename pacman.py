@@ -44,8 +44,11 @@ import pickle
 import random
 import sys
 import time
+from optparse import OptionParser
 
+import graphicsDisplay
 import layout
+import textDisplay
 from game import Actions
 from game import Directions
 from game import Game
@@ -472,7 +475,6 @@ class GhostRules:
                 state.data.scoreChange -= 500
                 state.data.lose = True
 
-
     @staticmethod
     def can_kill(pacman_position, ghost_position):
         return manhattanDistance(ghost_position, pacman_position) <= COLLISION_TOLERANCE
@@ -504,12 +506,11 @@ def parse_agent_args(str_):
     return opts
 
 
-def readCommand(argv):
+def read_command(argv):
     """
     Processes the command used to run pacman from the command line.
     """
-    from optparse import OptionParser
-    usageStr = """
+    usage_str = """
     USAGE:      python pacman.py <options>
     EXAMPLES:   (1) python pacman.py
                     - starts an interactive game
@@ -517,7 +518,7 @@ def readCommand(argv):
                 OR  python pacman.py -l smallClassic -z 2
                     - starts an interactive game on a smaller board, zoomed in
     """
-    parser = OptionParser(usageStr)
+    parser = OptionParser(usage_str)
 
     parser.add_option('-n', '--numGames', dest='numGames', type='int',
                       help=default('the number of GAMES to play'), metavar='GAMES', default=1)
@@ -555,27 +556,27 @@ def readCommand(argv):
     parser.add_option('--timeout', dest='timeout', type='int',
                       help=default('Maximum length of time an agent can spend computing in a single game'), default=30)
 
-    options, otherjunk = parser.parse_args(argv)
-    if len(otherjunk) != 0:
-        raise Exception('Command line input not understood: ' + str(otherjunk))
-    args = dict()
+    options, other_junk = parser.parse_args(argv)
+    if len(other_junk) != 0:
+        raise Exception('Command line input not understood: ' + str(other_junk))
+    args_ = dict()
 
     # Fix the random seed
     if options.fixRandomSeed: random.seed('cs188')
 
     # Choose a layout
-    args['layout'] = layout.getLayout(options.layout)
-    if args['layout'] == None: raise Exception("The layout " + options.layout + " cannot be found")
+    args_['layout'] = layout.getLayout(options.layout)
+    if args_['layout'] == None: raise Exception("The layout " + options.layout + " cannot be found")
 
     # Choose a Pacman agent
     noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics)
     pacmanType = loadAgent(options.pacman, noKeyboard)
     agentOpts = parse_agent_args(options.agentArgs)
     if options.numTraining > 0:
-        args['numTraining'] = options.numTraining
+        args_['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
     pacman = pacmanType(**agentOpts)  # Instantiate Pacman with agentArgs
-    args['pacman'] = pacman
+    args_['pacman'] = pacman
 
     # Don't display training games
     if 'numTrain' in agentOpts:
@@ -584,34 +585,31 @@ def readCommand(argv):
 
     # Choose a ghost agent
     ghostType = loadAgent(options.ghost, noKeyboard)
-    args['ghosts'] = [ghostType(i + 1) for i in range(options.numGhosts)]
+    args_['ghosts'] = [ghostType(i + 1) for i in range(options.numGhosts)]
 
     # Choose a display format
     if options.quietGraphics:
-        import textDisplay
-        args['display'] = textDisplay.NullGraphics()
+        args_['display'] = textDisplay.NullGraphics()
     elif options.textGraphics:
-        import textDisplay
         textDisplay.SLEEP_TIME = options.frameTime
-        args['display'] = textDisplay.PacmanGraphics()
+        args_['display'] = textDisplay.PacmanGraphics()
     else:
-        import graphicsDisplay
-        args['display'] = graphicsDisplay.PacmanGraphics(options.zoom, frameTime=options.frameTime)
-    args['numGames'] = options.numGames
-    args['record'] = options.record
-    args['catchExceptions'] = options.catchExceptions
-    args['timeout'] = options.timeout
+        args_['display'] = graphicsDisplay.PacmanGraphics(options.zoom, frameTime=options.frameTime)
+    args_['numGames'] = options.numGames
+    args_['record'] = options.record
+    args_['catchExceptions'] = options.catchExceptions
+    args_['timeout'] = options.timeout
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
         print('Replaying recorded game %s.' % options.gameToReplay)
         with open(options.gameToReplay) as f:
             recorded = pickle.load(f)
-        recorded['display'] = args['display']
+        recorded['display'] = args_['display']
         replayGame(**recorded)
         sys.exit(0)
 
-    return args
+    return args_
 
 
 def loadAgent(pacman, nographics):
@@ -707,7 +705,7 @@ if __name__ == '__main__':
 
     > python pacman.py --help
     """
-    args = readCommand(sys.argv[1:])  # Get game components based on input
+    args = read_command(sys.argv[1:])  # Get game components based on input
     runGames(**args)
 
     # import cProfile
