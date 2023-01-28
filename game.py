@@ -528,6 +528,14 @@ class GameStateData:
             self.agentStates.append(AgentState(Configuration(pos, Directions.STOP), isPacman))
         self._eaten = [False for a in self.agentStates]
 
+    @property
+    def win(self):
+        return self._win
+
+    @property
+    def lose(self):
+        return self._lose
+
 
 try:
     import boinc
