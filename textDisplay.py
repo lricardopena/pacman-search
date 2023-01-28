@@ -37,7 +37,7 @@ class NullGraphics:
         time.sleep(SLEEP_TIME)
 
     def draw(self, state):
-        print state
+        print(state)
 
     def updateDistributions(self, dist):
         pass
@@ -64,7 +64,7 @@ class PacmanGraphics:
             self.turn += 1
             if DISPLAY_MOVES:
                 ghosts = [pacman.nearestPoint(state.get_ghost_position(i)) for i in range(1, numAgents)]
-                print "%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.get_pacman_position()))), '| Score: %-5d' % state.score, '| Ghosts:', ghosts
+                print("%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.get_pacman_position()))), '| Score: %-5d' % state.score, '| Ghosts:', ghosts)
             if self.turn % DRAW_EVERY == 0:
                 self.draw(state)
                 self.pause()
@@ -75,7 +75,7 @@ class PacmanGraphics:
         time.sleep(SLEEP_TIME)
 
     def draw(self, state):
-        print state
+        print(state)
 
     def finish(self):
         pass
