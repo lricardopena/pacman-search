@@ -14,7 +14,7 @@
 
 # imports from python standard library
 import grading
-import imp
+import importlib
 import optparse
 import os
 import re
@@ -116,21 +116,16 @@ def setModuleName(module, filename):
             # TODO: assign member __file__'s?
         #print i, type(o)
 
-
-#from cStringIO import StringIO
-
 def loadModuleString(moduleSource):
     # Below broken, imp doesn't believe its being passed a file:
     #    ValueError: load_module arg#2 should be a file or None
     #
     #f = StringIO(moduleCodeDict[k])
     #tmp = imp.load_module(k, f, k, (".py", "r", imp.PY_SOURCE))
-    tmp = imp.new_module(k)
+    tmp = importlib.new_module(k)
     exec moduleCodeDict[k] in tmp.__dict__
     setModuleName(tmp, k)
     return tmp
-
-import py_compile
 
 def loadModuleFile(moduleName, filePath):
     with open(filePath, 'r') as f:

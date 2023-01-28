@@ -49,4 +49,4 @@ class GreedyAgent(Agent):
         return random.choice(bestActions)
 
 def scoreEvaluation(state):
-    return state.getScore()
+    return state.get_score()

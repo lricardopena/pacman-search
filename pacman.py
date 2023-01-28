@@ -114,7 +114,7 @@ class GameState:
 
         # Let agent's logic deal with its action's effects on the board
         if agent_index == 0:  # Pacman is moving
-            state.data._eaten = [False for _ in range(state.getNumAgents())]
+            state.data._eaten = [False for _ in range(state.get_num_agents())]
             PacmanRules.applyAction(state, action)
         else:  # A ghost is moving
             GhostRules.applyAction(state, action, agent_index)
@@ -160,7 +160,7 @@ class GameState:
         return self.data.agentStates[1:]
 
     def get_ghost_state(self, agent_index):
-        if agent_index == 0 or agent_index >= self.getNumAgents():
+        if agent_index == 0 or agent_index >= self.get_num_agents():
             raise Exception("Invalid index passed to getGhostState")
         return self.data.agentStates[agent_index]
 
@@ -172,13 +172,13 @@ class GameState:
     def get_ghost_positions(self):
         return [s.get_position() for s in self.get_ghost_states()]
 
-    def getNumAgents(self):
+    def get_num_agents(self):
         return len(self.data.agentStates)
 
-    def getScore(self):
+    def get_score(self):
         return float(self.data.score)
 
-    def getCapsules(self):
+    def get_capsules(self):
         """
         Returns a list of positions (x,y) of the remaining capsules.
         """
@@ -387,7 +387,7 @@ class PacmanRules:
                 state.data.scoreChange += 500
                 state.data._win = True
         # Eat capsule
-        if (position in state.getCapsules()):
+        if (position in state.get_capsules()):
             state.data.capsules.remove(position)
             state.data._capsuleEaten = position
             # Reset all ghosts' scared timers
@@ -684,7 +684,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
                 pickle.dump(components, f)
 
     if (numGames - numTraining) > 0:
-        scores = [game.state.getScore() for game in games]
+        scores = [game.state.get_score() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True) / float(len(wins))
         print('Average Score:', sum(scores) / float(len(scores)))
