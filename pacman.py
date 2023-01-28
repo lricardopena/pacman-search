@@ -97,9 +97,9 @@ class GameState:
             return []
 
         if agent_index == 0:  # Pacman is moving
-            return PacmanRules.getLegalActions(self)
+            return PacmanRules.get_legal_actions(self)
         else:
-            return GhostRules.getLegalActions(self, agent_index)
+            return GhostRules.get_legal_actions(self, agent_index)
 
     def generate_successor(self, agent_index, action):
         """
@@ -115,18 +115,18 @@ class GameState:
         # Let agent's logic deal with its action's effects on the board
         if agent_index == 0:  # Pacman is moving
             state.data._eaten = [False for _ in range(state.get_num_agents())]
-            PacmanRules.applyAction(state, action)
+            PacmanRules.apply_action(state, action)
         else:  # A ghost is moving
-            GhostRules.applyAction(state, action, agent_index)
+            GhostRules.apply_action(state, action, agent_index)
 
         # Time passes
         if agent_index == 0:
             state.data.scoreChange += -TIME_PENALTY  # Penalty for waiting around
         else:
-            GhostRules.decrementTimer(state.data.agentStates[agent_index])
+            GhostRules.decrement_timer(state.data.agentStates[agent_index])
 
         # Resolve multiagent effects
-        GhostRules.checkDeath(state, agent_index)
+        GhostRules.check_death(state, agent_index)
 
         # Bookkeeping
         state.data._agentMoved = agent_index
@@ -301,39 +301,45 @@ class ClassicGameRules:
         """
         Checks to see whether it is time to end the game.
         """
-        if state.is_win(): self.win(state, game)
-        if state.is_lose(): self.lose(state, game)
+        if state.is_win():
+            self.win(state, game)
+        if state.is_lose():
+            self.lose(state, game)
 
     def win(self, state, game):
-        if not self.quiet: print("Pacman emerges victorious! Score: %d" % state.data.score)
+        if not self.quiet:
+            print("Pacman emerges victorious! Score: %d" % state.data.score)
         game.gameOver = True
 
     def lose(self, state, game):
-        if not self.quiet: print("Pacman died! Score: %d" % state.data.score)
+        if not self.quiet:
+            print("Pacman died! Score: %d" % state.data.score)
         game.gameOver = True
 
-    def getProgress(self, game):
+    def get_progress(self, game):
         return float(game.state.get_num_food()) / self.initial_state.get_num_food()
 
-    def agentCrash(self, game, agentIndex):
-        if agentIndex == 0:
+    @staticmethod
+    def agent_crash(game, agent_index):
+        if agent_index == 0:
             print("Pacman crashed")
         else:
             print("A ghost crashed")
 
-    def getMaxTotalTime(self, agentIndex):
+    def get_max_total_time(self, agent_index):
         return self.timeout
 
-    def getMaxStartupTime(self, agentIndex):
+    def get_max_startup_time(self, agent_index):
         return self.timeout
 
-    def getMoveWarningTime(self, agentIndex):
+    def get_move_warning_time(self, agent_index):
         return self.timeout
 
-    def getMoveTimeout(self, agentIndex):
+    def get_move_timeout(self, agent_index):
         return self.timeout
 
-    def getMaxTimeWarnings(self, agentIndex):
+    @staticmethod
+    def get_max_time_warnings(agent_index):
         return 0
 
 
@@ -344,37 +350,36 @@ class PacmanRules:
     """
     PACMAN_SPEED = 1
 
-    def getLegalActions(state):
+    @staticmethod
+    def get_legal_actions(state):
         """
         Returns a list of possible actions.
         """
         return Actions.getPossibleActions(state.get_pacman_state().configuration, state.data.layout.walls)
 
-    getLegalActions = staticmethod(getLegalActions)
-
-    def applyAction(state, action):
+    @staticmethod
+    def apply_action(state, action):
         """
         Edits the state to reflect the results of the action.
         """
-        legal = PacmanRules.getLegalActions(state)
+        legal = PacmanRules.get_legal_actions(state)
         if action not in legal:
             raise Exception("Illegal action " + str(action))
 
-        pacmanState = state.data.agentStates[0]
+        pacman_state = state.data.agentStates[0]
 
         # Update Configuration
         vector = Actions.directionToVector(action, PacmanRules.PACMAN_SPEED)
-        pacmanState.configuration = pacmanState.configuration.generate_successor(vector)
+        pacman_state.configuration = pacman_state.configuration.generate_successor(vector)
 
         # Eat
-        next = pacmanState.configuration.get_position()
-        nearest = nearestPoint(next)
-        if manhattanDistance(nearest, next) <= 0.5:
+        next_ = pacman_state.configuration.get_position()
+        nearest = nearestPoint(next_)
+        if manhattanDistance(nearest, next_) <= 0.5:
             # Remove food
             PacmanRules.consume(nearest, state)
 
-    applyAction = staticmethod(applyAction)
-
+    @staticmethod
     def consume(position, state):
         x, y = position
         # Eat food
@@ -384,19 +389,17 @@ class PacmanRules:
             state.data.food[x][y] = False
             state.data._foodEaten = position
             # TODO: cache numFood?
-            numFood = state.get_num_food()
-            if numFood == 0 and not state.data._lose:
+            num_food = state.get_num_food()
+            if num_food == 0 and not state.data.lose:
                 state.data.scoreChange += 500
                 state.data._win = True
         # Eat capsule
-        if (position in state.get_capsules()):
+        if position in state.get_capsules():
             state.data.capsules.remove(position)
             state.data._capsuleEaten = position
             # Reset all ghosts' scared timers
             for index in range(1, len(state.data.agentStates)):
                 state.data.agentStates[index].scaredTimer = SCARED_TIME
-
-    consume = staticmethod(consume)
 
 
 class GhostRules:
@@ -405,83 +408,78 @@ class GhostRules:
     """
     GHOST_SPEED = 1.0
 
-    def getLegalActions(state, ghostIndex):
+    @staticmethod
+    def get_legal_actions(state, ghost_index):
         """
         Ghosts cannot stop, and cannot turn around unless they
         reach a dead end, but can turn 90 degrees at intersections.
         """
-        conf = state.get_ghost_state(ghostIndex).configuration
-        possibleActions = Actions.getPossibleActions(conf, state.data.layout.walls)
+        conf = state.get_ghost_state(ghost_index).configuration
+        possible_actions = Actions.getPossibleActions(conf, state.data.layout.walls)
         reverse = Actions.reverseDirection(conf.direction)
-        if Directions.STOP in possibleActions:
-            possibleActions.remove(Directions.STOP)
-        if reverse in possibleActions and len(possibleActions) > 1:
-            possibleActions.remove(reverse)
-        return possibleActions
+        if Directions.STOP in possible_actions:
+            possible_actions.remove(Directions.STOP)
+        if reverse in possible_actions and len(possible_actions) > 1:
+            possible_actions.remove(reverse)
+        return possible_actions
 
-    getLegalActions = staticmethod(getLegalActions)
+    @staticmethod
+    def apply_action(state, action, ghost_index):
 
-    def applyAction(state, action, ghostIndex):
-
-        legal = GhostRules.getLegalActions(state, ghostIndex)
+        legal = GhostRules.get_legal_actions(state, ghost_index)
         if action not in legal:
             raise Exception("Illegal ghost action " + str(action))
 
-        ghostState = state.data.agentStates[ghostIndex]
+        ghost_state = state.data.agentStates[ghost_index]
         speed = GhostRules.GHOST_SPEED
-        if ghostState.scaredTimer > 0: speed /= 2.0
+        if ghost_state.scaredTimer > 0:
+            speed /= 2.0
         vector = Actions.directionToVector(action, speed)
-        ghostState.configuration = ghostState.configuration.generate_successor(vector)
+        ghost_state.configuration = ghost_state.configuration.generate_successor(vector)
 
-    applyAction = staticmethod(applyAction)
-
-    def decrementTimer(ghostState):
-        timer = ghostState.scaredTimer
+    @staticmethod
+    def decrement_timer(ghost_state):
+        timer = ghost_state.scaredTimer
         if timer == 1:
-            ghostState.configuration.pos = nearestPoint(ghostState.configuration.pos)
-        ghostState.scaredTimer = max(0, timer - 1)
+            ghost_state.configuration.pos = nearestPoint(ghost_state.configuration.pos)
+        ghost_state.scaredTimer = max(0, timer - 1)
 
-    decrementTimer = staticmethod(decrementTimer)
-
-    def checkDeath(state, agentIndex):
-        pacmanPosition = state.get_pacman_position()
-        if agentIndex == 0:  # Pacman just moved; Anyone can kill him
+    @staticmethod
+    def check_death(state, agent_index):
+        pacman_position = state.get_pacman_position()
+        if agent_index == 0:  # Pacman just moved; Anyone can kill him
             for index in range(1, len(state.data.agentStates)):
-                ghostState = state.data.agentStates[index]
-                ghostPosition = ghostState.configuration.get_position()
-                if GhostRules.canKill(pacmanPosition, ghostPosition):
-                    GhostRules.collide(state, ghostState, index)
+                ghost_state = state.data.agentStates[index]
+                ghost_position = ghost_state.configuration.get_position()
+                if GhostRules.canKill(pacman_position, ghost_position):
+                    GhostRules.collide(state, ghost_state, index)
         else:
-            ghostState = state.data.agentStates[agentIndex]
-            ghostPosition = ghostState.configuration.get_position()
-            if GhostRules.canKill(pacmanPosition, ghostPosition):
-                GhostRules.collide(state, ghostState, agentIndex)
+            ghost_state = state.data.agentStates[agent_index]
+            ghost_position = ghost_state.configuration.get_position()
+            if GhostRules.canKill(pacman_position, ghost_position):
+                GhostRules.collide(state, ghost_state, agent_index)
 
-    checkDeath = staticmethod(checkDeath)
-
-    def collide(state, ghostState, agentIndex):
-        if ghostState.scaredTimer > 0:
+    @staticmethod
+    def collide(state, ghost_state, agent_index):
+        if ghost_state.scaredTimer > 0:
             state.data.scoreChange += 200
-            GhostRules.placeGhost(state, ghostState)
-            ghostState.scaredTimer = 0
+            GhostRules.placeGhost(state, ghost_state)
+            ghost_state.scaredTimer = 0
             # Added for first-person
-            state.data._eaten[agentIndex] = True
+            state.data.eaten[agent_index] = True
         else:
-            if not state.data._win:
+            if not state.data.win:
                 state.data.scoreChange -= 500
-                state.data._lose = True
+                state.data.lose = True
 
-    collide = staticmethod(collide)
 
+    @staticmethod
     def canKill(pacmanPosition, ghostPosition):
         return manhattanDistance(ghostPosition, pacmanPosition) <= COLLISION_TOLERANCE
 
-    canKill = staticmethod(canKill)
-
+    @staticmethod
     def placeGhost(state, ghostState):
         ghostState.configuration = ghostState.start
-
-    placeGhost = staticmethod(placeGhost)
 
 
 #############################

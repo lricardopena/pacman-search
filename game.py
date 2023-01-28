@@ -22,6 +22,7 @@
 
 import traceback
 
+from pacman import GameState
 from util import *
 
 
@@ -393,17 +394,17 @@ class GameStateData:
 
     """
 
-    def __init__(self, prevState=None):
+    def __init__(self, prev_state=None):
         """
         Generates a new data packet by copying information from its predecessor.
         """
-        if prevState != None:
-            self.food = prevState.food.shallowCopy()
-            self.capsules = prevState.capsules[:]
-            self.agentStates = self.copyAgentStates(prevState.agentStates)
-            self.layout = prevState.layout
-            self._eaten = prevState._eaten
-            self.score = prevState.score
+        if prev_state is not None:
+            self.food = prev_state.food.shallowCopy()
+            self.capsules = prev_state.capsules[:]
+            self.agentStates = self.copyAgentStates(prev_state.agentStates)
+            self.layout = prev_state.layout
+            self._eaten = prev_state._eaten
+            self.score = prev_state.score
 
         self._foodEaten = None
         self._foodAdded = None
@@ -433,12 +434,12 @@ class GameStateData:
         """
         Allows two states to be compared.
         """
-        if other == None: return False
+        if other is None:
+            return False
         # TODO Check for type of other
-        if not self.agentStates == other.agentStates: return False
-        if not self.food == other.food: return False
-        if not self.capsules == other.capsules: return False
-        if not self.score == other.score: return False
+        if not self.agentStates == other.agentStates or not self.food == other.food or not self.capsules == other.capsules \
+                or not self.score == other.score:
+            return False
         return True
 
     def __hash__(self):
@@ -456,28 +457,28 @@ class GameStateData:
 
     def __str__(self):
         width, height = self.layout.width, self.layout.height
-        map = Grid(width, height)
+        map_ = Grid(width, height)
         if type(self.food) == type((1, 2)):
             self.food = reconstituteGrid(self.food)
         for x in range(width):
             for y in range(height):
                 food, walls = self.food, self.layout.walls
-                map[x][y] = self._foodWallStr(food[x][y], walls[x][y])
+                map_[x][y] = self._foodWallStr(food[x][y], walls[x][y])
 
         for agentState in self.agentStates:
-            if agentState == None: continue
-            if agentState.configuration == None: continue
+            if agentState is None or agentState.configuration is None:
+                continue
             x, y = [int(i) for i in nearestPoint(agentState.configuration.pos)]
             agent_dir = agentState.configuration.direction
             if agentState.isPacman:
-                map[x][y] = self._pacStr(agent_dir)
+                map_[x][y] = self._pacStr(agent_dir)
             else:
-                map[x][y] = self._ghostStr(agent_dir)
+                map_[x][y] = self._ghostStr(agent_dir)
 
         for x, y in self.capsules:
-            map[x][y] = 'o'
+            map_[x][y] = 'o'
 
-        return str(map) + ("\nScore: %d\n" % self.score)
+        return str(map_) + ("\nScore: %d\n" % self.score)
 
     def _foodWallStr(self, hasFood, hasWall):
         if hasFood:
@@ -526,7 +527,7 @@ class GameStateData:
                 else:
                     numGhosts += 1
             self.agentStates.append(AgentState(Configuration(pos, Directions.STOP), isPacman))
-        self._eaten = [False for a in self.agentStates]
+        self._eaten = [False for _ in self.agentStates]
 
     @property
     def win(self):
@@ -549,6 +550,7 @@ class Game:
     """
     The Game manages the control flow, soliciting actions from agents.
     """
+    state: GameState
 
     def __init__(self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False):
         self.agentCrashed = False
@@ -560,24 +562,25 @@ class Game:
         self.muteAgents = muteAgents
         self.catchExceptions = catchExceptions
         self.moveHistory = []
-        self.totalAgentTimes = [0 for agent in agents]
-        self.totalAgentTimeWarnings = [0 for agent in agents]
+        self.totalAgentTimes = [0 for _ in agents]
+        self.totalAgentTimeWarnings = [0 for _ in agents]
         self.agentTimeout = False
         import io
-        self.agentOutput = [io.StringIO() for agent in agents]
+        self.agentOutput = [io.StringIO() for _ in agents]
 
     def getProgress(self):
         if self.gameOver:
             return 1.0
         else:
-            return self.rules.getProgress(self)
+            return self.rules.get_progress(self)
 
     def _agentCrash(self, agentIndex, quiet=False):
-        "Helper method for handling agent crashes"
-        if not quiet: traceback.print_exc()
+        """Helper method for handling agent crashes"""
+        if not quiet:
+            traceback.print_exc()
         self.gameOver = True
         self.agentCrashed = True
-        self.rules.agentCrash(self, agentIndex)
+        self.rules.agent_crash(self, agentIndex)
 
     OLD_STDOUT = None
     OLD_STDERR = None
@@ -620,7 +623,8 @@ class Game:
                 self.mute(i)
                 if self.catchExceptions:
                     try:
-                        timed_func = TimeoutFunction(agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
+                        timed_func = TimeoutFunction(agent.registerInitialState,
+                                                     int(self.rules.get_max_startup_time(i)))
                         try:
                             start_time = time.time()
                             timed_func(self.state.deep_copy())
@@ -655,7 +659,7 @@ class Game:
                 if self.catchExceptions:
                     try:
                         timed_func = TimeoutFunction(agent.observationFunction,
-                                                     int(self.rules.getMoveTimeout(agentIndex)))
+                                                     int(self.rules.get_move_timeout(agentIndex)))
                         try:
                             start_time = time.time()
                             observation = timed_func(self.state.deep_copy())
@@ -679,7 +683,7 @@ class Game:
             if self.catchExceptions:
                 try:
                     timed_func = TimeoutFunction(agent.get_action,
-                                                 int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))
+                                                 int(self.rules.get_move_timeout(agentIndex)) - int(move_time))
                     try:
                         start_time = time.time()
                         if skip_action:
@@ -694,11 +698,11 @@ class Game:
 
                     move_time += time.time() - start_time
 
-                    if move_time > self.rules.getMoveWarningTime(agentIndex):
+                    if move_time > self.rules.get_move_warning_time(agentIndex):
                         self.totalAgentTimeWarnings[agentIndex] += 1
                         print(sys.stderr, "Agent %d took too long to make a move! This is warning %d" % (
                             agentIndex, self.totalAgentTimeWarnings[agentIndex]))
-                        if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
+                        if self.totalAgentTimeWarnings[agentIndex] > self.rules.get_max_time_warnings(agentIndex):
                             print(sys.stderr, "Agent %d exceeded the maximum number of warnings: %d" % (
                                 agentIndex, self.totalAgentTimeWarnings[agentIndex]))
                             self.agentTimeout = True
@@ -708,7 +712,7 @@ class Game:
 
                     self.totalAgentTimes[agentIndex] += move_time
                     # print "Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex])
-                    if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
+                    if self.totalAgentTimes[agentIndex] > self.rules.get_max_total_time(agentIndex):
                         print(sys.stderr, "Agent %d ran out of time! (time: %1.2f)" % (
                             agentIndex, self.totalAgentTimes[agentIndex]))
                         self.agentTimeout = True
