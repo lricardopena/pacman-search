@@ -46,7 +46,7 @@ import search
 class GoWestAgent(Agent):
     """An agent that goes West until it can't."""
 
-    def getAction(self, state):
+    def get_action(self, state):
         """The agent receives a GameState (defined in pacman.py)."""
         if Directions.WEST in state.getLegalPacmanActions():
             return Directions.WEST
@@ -124,7 +124,7 @@ class SearchAgent(Agent):
         if '_expanded' in dir(problem):
             print('Search nodes expanded: %d' % problem._expanded)
 
-    def getAction(self, state):
+    def get_action(self, state):
         """
         Returns the next action in the path chosen earlier (in
         registerInitialState).  Return Directions.STOP if there is no further
@@ -505,7 +505,7 @@ class ClosestDotSearchAgent(SearchAgent):
                 if action not in legal:
                     t = (str(action), str(currentState))
                     raise Exception('findPathToClosestDot returned an illegal move: %s!\n%s' % t)
-                currentState = currentState.generateSuccessor(0, action)
+                currentState = currentState.generate_successor(0, action)
         self.actionIndex = 0
         print('Path found with cost %d.' % len(self.actions))
 

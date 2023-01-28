@@ -40,7 +40,7 @@ class Agent:
     def __init__(self, index=0):
         self.index = index
 
-    def getAction(self, state):
+    def get_action(self, state):
         """
         The Agent will receive a GameState (from either {pacman, capture, sonar}.py) and
         must return an action from Directions.{North, South, East, West, Stop}
@@ -83,13 +83,13 @@ class Configuration:
         self.pos = pos
         self.direction = direction
 
-    def getPosition(self):
+    def get_position(self):
         return self.pos
 
-    def getDirection(self):
+    def get_direction(self):
         return self.direction
 
-    def isInteger(self):
+    def is_integer(self):
         x, y = self.pos
         return x == int(x) and y == int(y)
 
@@ -104,7 +104,7 @@ class Configuration:
     def __str__(self):
         return "(x,y)=" + str(self.pos) + ", " + str(self.direction)
 
-    def generateSuccessor(self, vector):
+    def generate_successor(self, vector):
         """
         Generates a new configuration reached by translating the current
         configuration by the action vector.  This is a low-level call and does
@@ -125,10 +125,10 @@ class AgentState:
     AgentStates hold the state of an agent (configuration, speed, scared, etc).
     """
 
-    def __init__(self, startConfiguration, isPacman):
-        self.start = startConfiguration
-        self.configuration = startConfiguration
-        self.isPacman = isPacman
+    def __init__(self, start_configuration, is_pacman):
+        self.start = start_configuration
+        self.configuration = start_configuration
+        self.isPacman = is_pacman
         self.scaredTimer = 0
         self.numCarrying = 0
         self.numReturned = 0
@@ -155,13 +155,13 @@ class AgentState:
         state.numReturned = self.numReturned
         return state
 
-    def getPosition(self):
+    def get_position(self):
         if self.configuration is None:
             return None
-        return self.configuration.getPosition()
+        return self.configuration.get_position()
 
-    def getDirection(self):
-        return self.configuration.getDirection()
+    def get_direction(self):
+        return self.configuration.get_direction()
 
 
 class Grid:
@@ -173,16 +173,16 @@ class Grid:
     The __str__ method constructs an output that is oriented like a pacman board.
     """
 
-    def __init__(self, width, height, initialValue=False, bitRepresentation=None):
-        if initialValue not in [False, True]:
+    def __init__(self, width, height, initial_value=False, bit_representation=None):
+        if initial_value not in [False, True]:
             raise Exception('Grids can only contain booleans')
         self.CELLS_PER_INT = 30
 
         self.width = width
         self.height = height
-        self.data = [[initialValue for y in range(height)] for x in range(width)]
-        if bitRepresentation:
-            self._unpackBits(bitRepresentation)
+        self.data = [[initial_value for y in range(height)] for x in range(width)]
+        if bit_representation:
+            self._unpackBits(bit_representation)
 
     def __getitem__(self, i):
         return self.data[i]
@@ -290,7 +290,7 @@ def reconstituteGrid(bitRep):
     if type(bitRep) is not type((1, 2)):
         return bitRep
     width, height = bitRep[:2]
-    return Grid(width, height, bitRepresentation=bitRep[2:])
+    return Grid(width, height, bit_representation=bitRep[2:])
 
 
 ####################################
@@ -352,7 +352,7 @@ class Actions:
 
         # In between grid points, all agents must continue straight
         if (abs(x - x_int) + abs(y - y_int) > Actions.TOLERANCE):
-            return [config.getDirection()]
+            return [config.get_direction()]
 
         for dir_, vec in Actions._directionsAsList:
             dx, dy = vec
@@ -608,7 +608,7 @@ class Game:
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
-            if ("registerInitialState" in dir(agent)):
+            if "registerInitialState" in dir(agent):
                 self.mute(i)
                 if self.catchExceptions:
                     try:
@@ -670,7 +670,7 @@ class Game:
             self.mute(agentIndex)
             if self.catchExceptions:
                 try:
-                    timed_func = TimeoutFunction(agent.getAction,
+                    timed_func = TimeoutFunction(agent.get_action,
                                                  int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))
                     try:
                         start_time = time.time()
@@ -713,21 +713,21 @@ class Game:
                     self.unmute()
                     return
             else:
-                action = agent.getAction(observation)
+                action = agent.get_action(observation)
             self.unmute()
 
             # Execute the action
             self.moveHistory.append((agentIndex, action))
             if self.catchExceptions:
                 try:
-                    self.state = self.state.generateSuccessor(agentIndex, action)
+                    self.state = self.state.generate_successor(agentIndex, action)
                 except Exception as data:
                     self.mute(agentIndex)
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return
             else:
-                self.state = self.state.generateSuccessor(agentIndex, action)
+                self.state = self.state.generate_successor(agentIndex, action)
 
             # Change the display
             self.display.update(self.state.data)

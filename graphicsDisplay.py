@@ -423,11 +423,11 @@ class PacmanGraphics:
 
     def getPosition(self, agentState):
         if agentState.configuration == None: return (-1000, -1000)
-        return agentState.getPosition()
+        return agentState.get_position()
 
     def getDirection(self, agentState):
         if agentState.configuration == None: return Directions.STOP
-        return agentState.configuration.getDirection()
+        return agentState.configuration.get_direction()
 
     def finish(self):
         end_graphics()
@@ -671,7 +671,7 @@ class FirstPersonPacmanGraphics(PacmanGraphics):
         self.previousState = state
 
     def lookAhead(self, config, state):
-        if config.getDirection() == 'Stop':
+        if config.get_direction() == 'Stop':
             return
         else:
             pass
@@ -688,7 +688,7 @@ class FirstPersonPacmanGraphics(PacmanGraphics):
         return GHOST_COLORS[ghostIndex]
 
     def getPosition(self, ghostState):
-        if not self.showGhosts and not ghostState.isPacman and ghostState.getPosition()[1] > 1:
+        if not self.showGhosts and not ghostState.isPacman and ghostState.get_position()[1] > 1:
             return (-1000, -1000)
         else:
             return PacmanGraphics.getPosition(self, ghostState)
