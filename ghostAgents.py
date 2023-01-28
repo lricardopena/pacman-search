@@ -38,7 +38,7 @@ class RandomGhost( GhostAgent ):
     "A ghost that chooses a legal action uniformly at random."
     def getDistribution( self, state ):
         dist = util.Counter()
-        for a in state.getLegalActions( self.index ): dist[a] = 1.0
+        for a in state.get_legal_actions(self.index): dist[a] = 1.0
         dist.normalize()
         return dist
 
@@ -51,9 +51,9 @@ class DirectionalGhost( GhostAgent ):
 
     def getDistribution( self, state ):
         # Read variables from state
-        ghostState = state.getGhostState( self.index )
-        legalActions = state.getLegalActions( self.index )
-        pos = state.getGhostPosition( self.index )
+        ghostState = state.get_ghost_state(self.index)
+        legalActions = state.get_legal_actions(self.index)
+        pos = state.get_ghost_position(self.index)
         isScared = ghostState.scaredTimer > 0
 
         speed = 1
@@ -61,7 +61,7 @@ class DirectionalGhost( GhostAgent ):
 
         actionVectors = [Actions.directionToVector( a, speed ) for a in legalActions]
         newPositions = [( pos[0]+a[0], pos[1]+a[1] ) for a in actionVectors]
-        pacmanPosition = state.getPacmanPosition()
+        pacmanPosition = state.get_pacman_position()
 
         # Select best actions given the state
         distancesToPacman = [manhattanDistance( pos, pacmanPosition ) for pos in newPositions]

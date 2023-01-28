@@ -22,8 +22,8 @@ class LeftTurnAgent(game.Agent):
     "An agent that turns left at every opportunity"
 
     def get_action(self, state):
-        legal = state.getLegalPacmanActions()
-        current = state.getPacmanState().configuration.direction
+        legal = state.get_legal_pacman_actions()
+        current = state.get_pacman_state().configuration.direction
         if current == Directions.STOP: current = Directions.NORTH
         left = Directions.LEFT[current]
         if left in legal: return left
@@ -39,7 +39,7 @@ class GreedyAgent(Agent):
 
     def get_action(self, state):
         # Generate candidate actions
-        legal = state.getLegalPacmanActions()
+        legal = state.get_legal_pacman_actions()
         if Directions.STOP in legal: legal.remove(Directions.STOP)
 
         successors = [(state.generate_successor(0, action), action) for action in legal]

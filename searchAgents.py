@@ -48,7 +48,7 @@ class GoWestAgent(Agent):
 
     def get_action(self, state):
         """The agent receives a GameState (defined in pacman.py)."""
-        if Directions.WEST in state.getLegalPacmanActions():
+        if Directions.WEST in state.get_legal_pacman_actions():
             return Directions.WEST
         else:
             return Directions.STOP
@@ -162,7 +162,7 @@ class PositionSearchProblem(search.SearchProblem):
         goal: A position in the gameState
         """
         self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition()
+        self.startState = gameState.get_pacman_position()
         if start is not None:
             self.startState = start
         self.goal = goal
@@ -299,7 +299,7 @@ class CornersProblem(search.SearchProblem):
         Stores the walls, pacman's starting position and corners.
         """
         self.walls = startingGameState.getWalls()
-        self.startingPosition = startingGameState.getPacmanPosition()
+        self.startingPosition = startingGameState.get_pacman_position()
         top, right = self.walls.height - 2, self.walls.width - 2
         self.corners = ((1, 1), (1, top), (right, 1), (right, top))
         for corner in self.corners:
@@ -406,7 +406,7 @@ class FoodSearchProblem:
     """
 
     def __init__(self, startingGameState):
-        self.start = (startingGameState.getPacmanPosition(), startingGameState.getFood())
+        self.start = (startingGameState.get_pacman_position(), startingGameState.getFood())
         self.walls = startingGameState.getWalls()
         self.startingGameState = startingGameState
         self._expanded = 0  # DO NOT CHANGE
@@ -501,7 +501,7 @@ class ClosestDotSearchAgent(SearchAgent):
             nextPathSegment = self.findPathToClosestDot(currentState)  # The missing piece
             self.actions += nextPathSegment
             for action in nextPathSegment:
-                legal = currentState.getLegalActions()
+                legal = currentState.get_legal_actions()
                 if action not in legal:
                     t = (str(action), str(currentState))
                     raise Exception('findPathToClosestDot returned an illegal move: %s!\n%s' % t)
@@ -515,7 +515,7 @@ class ClosestDotSearchAgent(SearchAgent):
         gameState.
         """
         # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition()
+        startPosition = gameState.get_pacman_position()
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
@@ -547,7 +547,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
 
         # Store info for the PositionSearchProblem (no need to change this)
         self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition()
+        self.startState = gameState.get_pacman_position()
         self.costFn = lambda x: 1
         self._visited, self._visitedlist, self._expanded = {}, [], 0  # DO NOT CHANGE
 

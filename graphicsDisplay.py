@@ -676,7 +676,7 @@ class FirstPersonPacmanGraphics(PacmanGraphics):
         else:
             pass
             # Draw relevant ghosts
-            allGhosts = state.getGhostStates()
+            allGhosts = state.get_ghost_states()
             visibleGhosts = state.getVisibleGhosts()
             for i, ghost in enumerate(allGhosts):
                 if ghost in visibleGhosts:
