@@ -93,7 +93,7 @@ class GameState:
         Returns the legal actions for the agent specified.
         """
         #        GameState.explored.add(self)
-        if self.isWin() or self.isLose():
+        if self.is_win() or self.is_lose():
             return []
 
         if agent_index == 0:  # Pacman is moving
@@ -106,7 +106,7 @@ class GameState:
         Returns the successor state after the specified agent takes the action.
         """
         # Check that successors exist
-        if self.isWin() or self.isLose():
+        if self.is_win() or self.is_lose():
             raise Exception('Can\'t generate a successor of a terminal state.')
 
         # Copy current state
@@ -184,10 +184,10 @@ class GameState:
         """
         return self.data.capsules
 
-    def getNumFood(self):
+    def get_num_food(self):
         return self.data.food.count()
 
-    def getFood(self):
+    def get_food(self):
         """
         Returns a Grid of boolean food indicator variables.
 
@@ -199,7 +199,7 @@ class GameState:
         """
         return self.data.food
 
-    def getWalls(self):
+    def get_walls(self):
         """
         Returns a Grid of boolean wall indicator variables.
 
@@ -211,16 +211,16 @@ class GameState:
         """
         return self.data.layout.walls
 
-    def hasFood(self, x, y):
+    def has_food(self, x, y):
         return self.data.food[x][y]
 
-    def hasWall(self, x, y):
+    def has_wall(self, x, y):
         return self.data.layout.walls[x][y]
 
-    def isLose(self):
+    def is_lose(self):
         return self.data._lose
 
-    def isWin(self):
+    def is_win(self):
         return self.data._win
 
     #############################################
@@ -228,18 +228,18 @@ class GameState:
     # You shouldn't need to call these directly #
     #############################################
 
-    def __init__(self, prevState=None):
+    def __init__(self, prev_state=None):
         """
         Generates a new state by copying information from its predecessor.
         """
-        if prevState != None:  # Initial state
-            self.data = GameStateData(prevState.data)
+        if prev_state is not None:  # Initial state
+            self.data = GameStateData(prev_state.data)
         else:
             self.data = GameStateData()
 
-    def deepCopy(self):
+    def deep_copy(self):
         state = GameState(self)
-        state.data = self.data.deepCopy()
+        state.data = self.data.deep_copy()
         return state
 
     def __eq__(self, other):
@@ -258,11 +258,11 @@ class GameState:
 
         return str(self.data)
 
-    def initialize(self, layout, numGhostAgents=1000):
+    def initialize(self, layout_, num_ghost_agents=1000):
         """
         Creates an initial game state from a layout array (see layout.py).
         """
-        self.data.initialize(layout, numGhostAgents)
+        self.data.initialize(layout_, num_ghost_agents)
 
 
 ############################################################################
@@ -281,17 +281,19 @@ class ClassicGameRules:
     These game rules manage the control flow of a game, deciding when
     and how the game starts and ends.
     """
+    initial_state: GameState
+    quiet: bool
 
     def __init__(self, timeout=30):
         self.timeout = timeout
 
-    def newGame(self, layout, pacmanAgent, ghostAgents, display, quiet=False, catchExceptions=False):
-        agents = [pacmanAgent] + ghostAgents[:layout.getNumGhosts()]
-        initState = GameState()
-        initState.initialize(layout, len(ghostAgents))
-        game = Game(agents, display, self, catchExceptions=catchExceptions)
-        game.state = initState
-        self.initialState = initState.deepCopy()
+    def new_game(self, layout_, pacman_agent, ghost_agents, display, quiet=False, catch_exceptions=False):
+        agents = [pacman_agent] + ghost_agents[:layout_.getNumGhosts()]
+        init_state = GameState()
+        init_state.initialize(layout_, len(ghost_agents))
+        game = Game(agents, display, self, catchExceptions=catch_exceptions)
+        game.state = init_state
+        self.initial_state = init_state.deep_copy()
         self.quiet = quiet
         return game
 
@@ -299,8 +301,8 @@ class ClassicGameRules:
         """
         Checks to see whether it is time to end the game.
         """
-        if state.isWin(): self.win(state, game)
-        if state.isLose(): self.lose(state, game)
+        if state.is_win(): self.win(state, game)
+        if state.is_lose(): self.lose(state, game)
 
     def win(self, state, game):
         if not self.quiet: print("Pacman emerges victorious! Score: %d" % state.data.score)
@@ -311,7 +313,7 @@ class ClassicGameRules:
         game.gameOver = True
 
     def getProgress(self, game):
-        return float(game.state.getNumFood()) / self.initialState.getNumFood()
+        return float(game.state.get_num_food()) / self.initial_state.get_num_food()
 
     def agentCrash(self, game, agentIndex):
         if agentIndex == 0:
@@ -382,7 +384,7 @@ class PacmanRules:
             state.data.food[x][y] = False
             state.data._foodEaten = position
             # TODO: cache numFood?
-            numFood = state.getNumFood()
+            numFood = state.get_num_food()
             if numFood == 0 and not state.data._lose:
                 state.data.scoreChange += 500
                 state.data._win = True
@@ -641,7 +643,7 @@ def replayGame(layout, actions, display):
     import pacmanAgents, ghostAgents
     rules = ClassicGameRules()
     agents = [pacmanAgents.GreedyAgent()] + [ghostAgents.RandomGhost(i + 1) for i in range(layout.getNumGhosts())]
-    game = rules.newGame(layout, agents[0], agents[1:], display)
+    game = rules.new_game(layout, agents[0], agents[1:], display)
     state = game.state
     display.initialize(state.data)
 
@@ -673,7 +675,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
         else:
             gameDisplay = display
             rules.quiet = False
-        game = rules.newGame(layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
+        game = rules.new_game(layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
         game.run()
         if not beQuiet: games.append(game)
 
@@ -685,7 +687,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
 
     if (numGames - numTraining) > 0:
         scores = [game.state.get_score() for game in games]
-        wins = [game.state.isWin() for game in games]
+        wins = [game.state.is_win() for game in games]
         winRate = wins.count(True) / float(len(wins))
         print('Average Score:', sum(scores) / float(len(scores)))
         print('Scores:       ', ', '.join([str(score) for score in scores]))

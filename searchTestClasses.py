@@ -392,7 +392,7 @@ class CornerProblemTest(testClasses.TestCase):
         gameState = pacman.GameState()
         gameState.initialize(lay, 0)
         visited = getStatesFromPath(gameState.get_pacman_position(), path)
-        top, right = gameState.getWalls().height - 2, gameState.getWalls().width - 2
+        top, right = gameState.get_walls().height - 2, gameState.get_walls().width - 2
         missedCorners = [p for p in ((1, 1), (1, top), (right, 1), (right, top)) if p not in visited]
 
         return path, missedCorners

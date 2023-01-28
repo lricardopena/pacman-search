@@ -216,7 +216,7 @@ class Grid:
         g.data = [x[:] for x in self.data]
         return g
 
-    def deepCopy(self):
+    def deep_copy(self):
         return self.copy()
 
     def shallowCopy(self):
@@ -413,10 +413,10 @@ class GameStateData:
         self._win = False
         self.scoreChange = 0
 
-    def deepCopy(self):
+    def deep_copy(self):
         state = GameStateData(self)
-        state.food = self.food.deepCopy()
-        state.layout = self.layout.deepCopy()
+        state.food = self.food.deep_copy()
+        state.layout = self.layout.deep_copy()
         state._agentMoved = self._agentMoved
         state._foodEaten = self._foodEaten
         state._foodAdded = self._foodAdded
@@ -615,7 +615,7 @@ class Game:
                         timed_func = TimeoutFunction(agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
                         try:
                             start_time = time.time()
-                            timed_func(self.state.deepCopy())
+                            timed_func(self.state.deep_copy())
                             time_taken = time.time() - start_time
                             self.totalAgentTimes[i] += time_taken
                         except TimeoutFunctionException:
@@ -629,7 +629,7 @@ class Game:
                         self.unmute()
                         return
                 else:
-                    agent.registerInitialState(self.state.deepCopy())
+                    agent.registerInitialState(self.state.deep_copy())
                 ## TODO: could this exceed the total time
                 self.unmute()
 
@@ -650,7 +650,7 @@ class Game:
                                                      int(self.rules.getMoveTimeout(agentIndex)))
                         try:
                             start_time = time.time()
-                            observation = timed_func(self.state.deepCopy())
+                            observation = timed_func(self.state.deep_copy())
                         except TimeoutFunctionException:
                             skip_action = True
                         move_time += time.time() - start_time
@@ -660,10 +660,10 @@ class Game:
                         self.unmute()
                         return
                 else:
-                    observation = agent.observationFunction(self.state.deepCopy())
+                    observation = agent.observationFunction(self.state.deep_copy())
                 self.unmute()
             else:
-                observation = self.state.deepCopy()
+                observation = self.state.deep_copy()
 
             # Solicit an action
             action = None

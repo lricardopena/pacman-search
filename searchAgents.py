@@ -161,14 +161,14 @@ class PositionSearchProblem(search.SearchProblem):
         costFn: A function from a search state (tuple) to a non-negative number
         goal: A position in the gameState
         """
-        self.walls = gameState.getWalls()
+        self.walls = gameState.get_walls()
         self.startState = gameState.get_pacman_position()
         if start is not None:
             self.startState = start
         self.goal = goal
         self.costFn = costFn
         self.visualize = visualize
-        if warn and (gameState.getNumFood() != 1 or not gameState.hasFood(*goal)):
+        if warn and (gameState.get_num_food() != 1 or not gameState.has_food(*goal)):
             print('Warning: this does not look like a regular search maze')
 
         # For display purposes
@@ -298,12 +298,12 @@ class CornersProblem(search.SearchProblem):
         """
         Stores the walls, pacman's starting position and corners.
         """
-        self.walls = startingGameState.getWalls()
+        self.walls = startingGameState.get_walls()
         self.startingPosition = startingGameState.get_pacman_position()
         top, right = self.walls.height - 2, self.walls.width - 2
         self.corners = ((1, 1), (1, top), (right, 1), (right, top))
         for corner in self.corners:
-            if not startingGameState.hasFood(*corner):
+            if not startingGameState.has_food(*corner):
                 print('Warning: no food in corner ' + str(corner))
         self._expanded = 0  # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
@@ -406,8 +406,8 @@ class FoodSearchProblem:
     """
 
     def __init__(self, startingGameState):
-        self.start = (startingGameState.get_pacman_position(), startingGameState.getFood())
-        self.walls = startingGameState.getWalls()
+        self.start = (startingGameState.get_pacman_position(), startingGameState.get_food())
+        self.walls = startingGameState.get_walls()
         self.startingGameState = startingGameState
         self._expanded = 0  # DO NOT CHANGE
         self.heuristicInfo = {}  # A dictionary for the heuristic to store information
@@ -497,7 +497,7 @@ class ClosestDotSearchAgent(SearchAgent):
     def registerInitialState(self, state):
         self.actions = []
         currentState = state
-        while currentState.getFood().count() > 0:
+        while currentState.get_food().count() > 0:
             nextPathSegment = self.findPathToClosestDot(currentState)  # The missing piece
             self.actions += nextPathSegment
             for action in nextPathSegment:
@@ -516,8 +516,8 @@ class ClosestDotSearchAgent(SearchAgent):
         """
         # Here are some useful elements of the startState
         startPosition = gameState.get_pacman_position()
-        food = gameState.getFood()
-        walls = gameState.getWalls()
+        food = gameState.get_food()
+        walls = gameState.get_walls()
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
@@ -543,10 +543,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """Stores information from the gameState.  You don't need to change this."""
         # Store the food for later reference
         super().__init__(gameState)
-        self.food = gameState.getFood()
+        self.food = gameState.get_food()
 
         # Store info for the PositionSearchProblem (no need to change this)
-        self.walls = gameState.getWalls()
+        self.walls = gameState.get_walls()
         self.startState = gameState.get_pacman_position()
         self.costFn = lambda x: 1
         self._visited, self._visitedlist, self._expanded = {}, [], 0  # DO NOT CHANGE
@@ -574,7 +574,7 @@ def mazeDistance(point1, point2, gameState):
     """
     x1, y1 = point1
     x2, y2 = point2
-    walls = gameState.getWalls()
+    walls = gameState.get_walls()
     assert not walls[x1][y1], 'point1 is a wall: ' + str(point1)
     assert not walls[x2][y2], 'point2 is a wall: ' + str(point2)
     prob = PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)

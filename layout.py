@@ -89,7 +89,7 @@ class Layout:
     def __str__(self):
         return "\n".join(self.layoutText)
 
-    def deepCopy(self):
+    def deep_copy(self):
         return Layout(self.layoutText[:])
 
     def processLayoutText(self, layoutText):
